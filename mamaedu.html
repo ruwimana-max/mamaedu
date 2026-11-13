@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MamaEdu - Your Smart Companion</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #101326;
+  color: white;
+  min-height: 100vh;
+}
+
+header {
+  padding: 18px 22px;
+  background: #191d38;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #343957;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: bold;
+  color: #c5a7ff;
+}
+
+.status {
+  color: #8fe5b1;
+  font-size: 12px;
+}
+
+main {
+  max-width: 850px;
+  margin: auto;
+  padding: 25px 16px;
+}
+
+.welcome {
+  text-align: center;
+  padding: 25px 10px;
+}
+
+.orb {
+  width: 95px;
+  height: 95px;
+  margin: auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9c68ff, #48c9d8);
+  box-shadow: 0 0 40px #855bff66;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 38px;
+}
+
+h1 {
+  margin-bottom: 8px;
+  font-size: 30px;
+}
+
+.welcome p {
+  color: #b8bdd4;
+  line-height: 1.6;
+}
+
+.chat {
+  background: #191d38;
+  border: 1px solid #343957;
+  border-radius: 18px;
+  padding: 16px;
+  min-height: 260px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.message {
+  padding: 12px 15px;
+  margin: 12px 0;
+  border-radius: 14px;
+  line-height: 1.5;
+  max-width: 85%;
+  overflow-wrap: anywhere;
+}
+
+.bot {
+  background: #292e50;
+  margin-right: auto;
+}
+
+.user {
+  background: #6849b5;
+  margin-left: auto;
+}
+
+.controls {
+  display: flex;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+input {
+  min-width: 0;
+  flex: 1;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #454a6c;
+  background: #191d38;
+  color: white;
+  outline: none;
+  font-size: 15px;
+}
+
+button {
+  border: none;
+  padding: 13px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #9a73ed;
+  color: white;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+.voice {
+  background: #287e91;
+}
+
+.extra {
+  background: #343957;
+}
+
+.suggestions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.suggestions button {
+  font-size: 12px;
+  background: #292e50;
+  border: 1px solid #454a6c;
+}
+
+.note {
+  margin-top: 18px;
+  color: #9da5c3;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #858ca9;
+  font-size: 12px;
+}
+
+@media(max-width: 500px) {
+  .controls {
+    flex-wrap: wrap;
+  }
+
+  input {
+    flex-basis: 100%;
+  }
+
+  button {
+    flex: 1;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">💜 MamaEdu</div>
+  <div class="status">● Ready to chat</div>
+</header>
+
+<main>
+
+<section class="welcome">
+  <div class="orb">✦</div>
+  <h1>Hello, welcome to MamaEdu!</h1>
+  <p>
+    Your smart learning and life companion.
+    Ask questions, explore ideas, learn something new
+    and share what's on your mind.
+  </p>
+</section>
+
+<section class="chat" id="chat">
+  <div class="message bot">
+    Hello! I'm MamaEdu. 😊
+    <br><br>
+    What would you like to talk about today?
+  </div>
+</section>
+
+<div class="controls">
+  <input
+    id="userInput"
+    type="text"
+    placeholder="Write a message to MamaEdu..."
+    autocomplete="off"
+  >
+  <button onclick="sendMessage()">Send</button>
+  <button class="voice" onclick="startVoice()">🎤</button>
+</div>
+
+<div class="suggestions">
+  <button onclick="quickMessage('Help me with my studies')">📚 Study help</button>
+  <button onclick="quickMessage('Tell me something interesting')">💡 Interesting facts</button>
+  <button onclick="quickMessage('I need advice')">🌱 Advice</button>
+  <button onclick="quickMessage('Tell me a joke')">😄 Joke</button>
+</div>
+
+<div class="controls">
+  <button class="extra" onclick="toggleSpeech()" id="speechButton">
+    🔊 Voice: On
+  </button>
+  <button class="extra" onclick="clearChat()">Clear conversation</button>
+</div>
+
+<div class="note">
+  MamaEdu currently uses demonstration responses, not a connected AI model.
+  Your conversation is not saved permanently by this prototype.
+  Do not enter passwords or sensitive personal information.
+</div>
+
+</main>
+
+<footer>
+  © 2026 MamaEdu | Learn • Think • Grow
+</footer>
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("userInput");
+
+let speechEnabled = true;
+
+function addMessage(text, sender) {
+  const message = document.createElement("div");
+  message.className = "message " + sender;
+  message.textContent = text;
+  chat.appendChild(message);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function getResponse(message) {
+  const text = message.toLowerCase();
+
+  if (text.match(/\b(hello|hi|hey|good morning|good evening)\b/)) {
+    return "Hello! 😊 It's lovely to have you here. What would you like to explore today?";
+  }
+
+  if (text.includes("your name") || text.includes("who are you")) {
+    return "I'm MamaEdu, your smart learning and life companion. I'm here to help you explore ideas and learn new things!";
+  }
+
+  if (text.includes("study") || text.includes("homework")) {
+    return "Let's make learning easier! Tell me the subject and the question you are working on. We can understand it step by step.";
+  }
+
+  if (text.includes("science") || text.includes("chemistry")) {
+    return "Science helps us understand the world around us. What scientific topic interests you? We can explore it together.";
+  }
+
+  if (text.includes("advice") || text.includes("problem")) {
+    return "I'm listening. Tell me a little about what's happening, and we can think through your options together. For serious problems, a trusted adult can also help.";
+  }
+
+  if (text.includes("joke")) {
+    return "Why did the computer go to school? Because it wanted to improve its processing skills! 😂";
+  }
+
+  if (text.includes("thank")) {
+    return "You're welcome! 💜 Keep being curious and never stop learning.";
+  }
+
+  if (text.includes("fact")) {
+    return "Here's an interesting fact: An octopus has three hearts! Nature is full of surprises. 🐙";
+  }
+
+  if (text.includes("sad") || text.includes("lonely")) {
+    return "I'm sorry things feel difficult right now. You deserve kindness and support. Would talking with someone you trust help?";
+  }
+
+  if (text.includes("bye") || text.includes("goodbye")) {
+    return "Goodbye for now! Keep learning, growing and believing in your ability to improve. 💜";
+  }
+
+  return "That's an interesting question! I can help with learning, ideas and everyday topics. Could you give me a little more detail so I can guide you better?";
+}
+
+function speak(text) {
+  if (!speechEnabled || !("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "en-US";
+  speech.rate = 0.95;
+
+  const voices = window.speechSynthesis.getVoices();
+  const femaleVoice = voices.find(v =>
+    /female|samantha|zira|google uk english female/i.test(v.name)
+  );
+
+  if (femaleVoice) {
+    speech.voice = femaleVoice;
+  }
+
+  window.speechSynthesis.speak(speech);
+}
+
+function sendMessage() {
+  const message = input.value.trim();
+
+  if (!message) return;
+
+  addMessage(message, "user");
+  input.value = "";
+
+  const response = getResponse(message);
+
+  setTimeout(() => {
+    addMessage(response, "bot");
+    speak(response);
+  }, 400);
+}
+
+function quickMessage(message) {
+  input.value = message;
+  sendMessage();
+}
+
+function toggleSpeech() {
+  speechEnabled = !speechEnabled;
+
+  document.getElementById("speechButton").textContent =
+    speechEnabled ? "🔊 Voice: On" : "🔇 Voice: Off";
+
+  if (!speechEnabled && "speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+function clearChat() {
+  chat.innerHTML = "";
+
+  addMessage(
+    "Welcome back! 😊 What would you like to discuss?",
+    "bot"
+  );
+}
+
+function startVoice() {
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition is not supported by this browser. Please use the text box instead.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+
+  recognition.onresult = function(event) {
+    input.value = event.results[0][0].transcript;
+    sendMessage();
+  };
+
+  recognition.onerror = function() {
+    alert("Voice input was not successful. Please try again or type your message.");
+  };
+
+  recognition.start();
+}
+
+input.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    sendMessage();
+  }
+});
+
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.getVoices();
+}
+</script>
+
+</body>
+</html>
+
